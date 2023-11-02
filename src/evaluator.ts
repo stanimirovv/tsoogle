@@ -84,18 +84,34 @@ function isArgumentMatch (searchQuery: SearchQuery, func: MethodDeclaration | Fu
 
   const functionParameters = func.getParameters()
 
-  if (searchQuery.parameterTypes.length !== functionParameters.length) {
+  const isFirstSearchQueryParamSpread = searchQuery.parameterTypes[0][0] === '...'
+  if (isFirstSearchQueryParamSpread) {
+    searchQuery.parameterTypes.shift()
+  }
+
+  if (searchQuery.parameterTypes.length !== functionParameters.length && !isFirstSearchQueryParamSpread) {
     return false
   }
 
-  const argumentMatches: boolean[] = []
-  for (let i = 0; i < searchQuery.parameterTypes.length; i++) {
-    argumentMatches.push(isSingleArgumentMatch(searchQuery.parameterTypes[i], functionParameters[i]))
+  if (!isFirstSearchQueryParamSpread) {
+    const argumentMatches: boolean[] = []
+    for (let i = 0; i < searchQuery.parameterTypes.length; i++) {
+      argumentMatches.push(isSingleArgumentMatch(searchQuery.parameterTypes[i], functionParameters[i]))
+    }
+
+    return argumentMatches.every((match) => match)
+  } else {
+    const argumentMatches: boolean[] = []
+    for (let i = 0; i < searchQuery.parameterTypes.length; i++) {
+      for (let k = 0; k < functionParameters.length; k++) {
+        argumentMatches.push(isSingleArgumentMatch(searchQuery.parameterTypes[i], functionParameters[k]))
+      }
+    }
+
+    // Restore, TODO: fix this
+    searchQuery.parameterTypes.unshift(['...'])
+    return argumentMatches.some((match) => match)
   }
-
-  const areAllArgumentMatchesTrue = argumentMatches.every((match) => match)
-
-  return areAllArgumentMatchesTrue
 }
 
 function isSingleArgumentMatch (searchParameterTypes: string[], functionParameter: ParameterDeclaration): boolean {

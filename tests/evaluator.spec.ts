@@ -40,4 +40,9 @@ describe('getMatchingFunctions everything defined', () => {
     const result = getMatchingFunctions('testproject.tsconfig.json', { kind: 'function', returnTypes: ['Record<string, string>', 'boolean'], parameterTypes: [] })
     expect(result.length).toEqual(1)
   })
+
+  it('should correctly parse ":?...,string"', () => {
+    const result = getMatchingFunctions('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['...'], ['string']] })
+    expect(result.length).toEqual(3)
+  })
 })
