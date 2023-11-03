@@ -57,8 +57,11 @@ npx tsoogle <path to tsconfig.json> <query>
 Tsoogle has it's own tiny query language that we use to search for functions and methods.
 
 ### Form
+<method or function>:<return type>?<param1>,<param2>...
 
-### Basic examples
+If you leave out method or function it will search for both.
+If you want to return anything put * as the return type.
+Parameters must be separated by commas and unions are supported. See examples above.
 
 ### ... Operator
 if the first argument is ... then if any of the arguments match the function will be matched.
@@ -66,7 +69,9 @@ if the first argument is ... then if any of the arguments match the function wil
 
 ### Partial type checking
 
-Instead of the name of the argument you can
+Instead of the name of the argument you can use the following format to match a subtype:
+`{a&b}` - matches any type that has as a subtype both a and b. In layman terms both a & b must be present as keys in the type
+!!! Currently it does not support nesting and works only on object types.
 
 
 
