@@ -57,7 +57,7 @@ npx tsoogle <path to tsconfig.json> <query>
 Tsoogle has it's own tiny query language that we use to search for functions and methods.
 
 ### Form
-<method or function>:<return type>?<param1>,<param2>...
+`<method or function>:<return type>?<param1>,<param2>...`
 
 If you leave out method or function it will search for both.
 If you want to return anything put * as the return type.
