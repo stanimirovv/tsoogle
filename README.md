@@ -47,7 +47,10 @@ This is where tsoogle comes in - it allows to conviniently and fuzzily search fo
 Tsoogle was inspired by haskell's hoogle.
 
 ## Usage
-TODO
+```bash
+npm i @stanimirovv/tsoogle
+npx tsoogle <path to tsconfig.json> <query>
+```
 
 ## Query language
 

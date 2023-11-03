@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { getMatchingFunctions } from './src/evaluator'
 import { parse } from './src/lexer'
 import { prettify } from './src/prettyfier'
