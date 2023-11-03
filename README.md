@@ -1,7 +1,7 @@
 # Tsoogle - like google, but for your typescript project
 
-A fast and configurable way to explore your typescript project.
-Find functions or methods by approximate signature - focus on return type, argument types or both.
+Find functions or methods by approximate signature - return type, argument types or both.
+Supports optional arguments, rest arguments and partial type checking.
 
 Use tsoogle to:
 * find the function you need
@@ -34,7 +34,7 @@ npx ts-node index.ts testproject.tsconfig.json ":*?string,number|string"
 npx ts-node index.ts testproject.tsconfig.json ":*?{a&b}"
 { kind: 'both', returnTypes: [ '*' ], parameterTypes: [ [ '{a&b}' ] ] }
 /Users/dot/code/tsoogle/tests/testProject/class.ts:12 asd(TestType): string
-`
+```
 
 ## Motivation
 
@@ -45,6 +45,9 @@ You can't easily find all functions with 2 parameters of type A and B that retur
 
 This is where tsoogle comes in - it allows to conviniently and fuzzily search for functions and methods by their signature.
 Tsoogle was inspired by haskell's hoogle.
+
+## Usage
+TODO
 
 ## Query language
 
@@ -75,4 +78,4 @@ For code to be accepted:
 Basically must pass:
 ```bash
 npm test && npm run lint
-`
+```
