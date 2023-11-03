@@ -1,4 +1,5 @@
 import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration } from 'ts-morph'
+import { parseTypeQuery } from './lexer'
 import type { SearchQuery } from './searchQuery.type'
 
 export interface FunctionDetail {
@@ -89,6 +90,7 @@ function isArgumentMatch (searchQuery: SearchQuery, func: MethodDeclaration | Fu
     searchQuery.parameterTypes.shift()
   }
 
+  // argument length may mismatch only if the spread operator is used
   if (searchQuery.parameterTypes.length !== functionParameters.length && !isFirstSearchQueryParamSpread) {
     return false
   }
@@ -123,8 +125,18 @@ function isSingleArgumentMatch (searchParameterTypes: string[], functionParamete
   }
 
   for (const searchParameterType of searchParameterTypes) {
+    // Symbol name match
     if (removeDynamicImports(functionParameterType).includes(searchParameterType)) {
       return true
+    }
+
+    // Symbol type match
+    const searchParameterTypeFirstChar = searchParameterType[0]
+    const searchParameterTypeLastChar = searchParameterType[searchParameterType.length - 1]
+    if (searchParameterTypeFirstChar === '{' && searchParameterTypeLastChar === '}') {
+      if (doTypesMatch(searchParameterType, functionParameter)) {
+        return true
+      }
     }
   }
 
@@ -137,34 +149,20 @@ function removeDynamicImports (inputStr: string): string {
 }
 
 // showcase how we might add partial type checking
-// function _getMatchingFunctions (tsconfigPath: string, obj: object): FunctionDetail[] {
-//   const project = new Project({ tsConfigFilePath: tsconfigPath })
+function doTypesMatch (searchParameterType: string, functionParameter: ParameterDeclaration): boolean {
+  const mandatoryObjectKeys = parseTypeQuery(searchParameterType)
+  const properties = functionParameter.getType().getProperties()
 
-//   const results: FunctionDetail[] = []
+  const matches: boolean[] = []
+  for (const propName of mandatoryObjectKeys) {
+    let match = false
+    for (const tsProperty of properties) {
+      if (tsProperty.getName() === propName) {
+        match = true
+      }
+    }
+    matches.push(match)
+  }
 
-//   for (const sourceFile of project.getSourceFiles()) {
-//     for (const func of sourceFile.getFunctions()) {
-//       const firstParam = func.getParameters()[0]
-//       if (firstParam !== undefined) {
-//         const paramType = firstParam.getType()
-//         const properties = paramType.getProperties()
-
-//         console.log('properties', paramType.getText())
-
-//         const allPropsExist = Object.keys(obj).every(propName =>
-//           properties.some(tsProperty => tsProperty.getName() === propName)
-//         )
-
-//         if (allPropsExist) {
-//           results.push({
-//             fileName: sourceFile.getFilePath(),
-//             functionName: func.getName() ?? 'Anonymous',
-//             line: func.getStartLineNumber()
-//           })
-//         }
-//       }
-//     }
-//   }
-
-//   return results
-// }
+  return matches.every((match) => match)
+}

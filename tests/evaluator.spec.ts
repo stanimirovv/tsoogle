@@ -45,4 +45,19 @@ describe('getMatchingFunctions everything defined', () => {
     const result = getMatchingFunctions('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['...'], ['string']] })
     expect(result.length).toEqual(3)
   })
+
+  it('should correctly parse ":?{a&b}"', () => {
+    const result = getMatchingFunctions('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['{a&b}']] })
+    expect(result.length).toEqual(1)
+  })
+
+  it('should correctly parse ":?{a&c}"', () => {
+    const result = getMatchingFunctions('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['{a&c}']] })
+    expect(result.length).toEqual(0)
+  })
+
+  it('should correctly parse ":?{a}"', () => {
+    const result = getMatchingFunctions('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['{a}']] })
+    expect(result.length).toEqual(1)
+  })
 })

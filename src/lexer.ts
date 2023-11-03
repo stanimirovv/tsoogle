@@ -25,6 +25,11 @@ export function parse (input: string): SearchQuery {
   }
 }
 
+// takes as input a string like {a,b,c} converts to ['a', 'b', 'c']
+export function parseTypeQuery (input: string): string[] {
+  return input.replace('{', '').replace('}', '').split('&')
+}
+
 function calculateKind (match: string): 'function' | 'method' | 'both' {
   if (match === '') {
     return 'both'

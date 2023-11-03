@@ -36,16 +36,4 @@ describe('parseTypeString', () => {
       parameterTypes: [['Product'], ['Service', 'number']]
     })
   })
-
-  it.skip('should correctly parse "method:void|Promise<any>?Product|Service,number"', () => {
-    expect(() => {
-      parse('method:void|Promise<any>?Product|Service,number')
-    }).toThrowError('Invalid input string format')
-  })
-
-  it.skip('should throw error for invalid strings', () => {
-    expect(() => {
-      parse('randomText')
-    }).toThrowError('Invalid input string format')
-  })
 })
