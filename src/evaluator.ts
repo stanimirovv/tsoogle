@@ -1,4 +1,4 @@
-import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration } from 'ts-morph'
+import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration, Type } from 'ts-morph'
 import { parseTypeQuery } from './lexer'
 import type { SearchQuery } from './searchQuery.type'
 
@@ -10,7 +10,7 @@ export interface FunctionDetail {
   returnType: string
 }
 
-export function getMatchingFunctions (tsconfigPath: string, searchQuery: SearchQuery): FunctionDetail[] {
+export function evaluateSearchQuery (tsconfigPath: string, searchQuery: SearchQuery): FunctionDetail[] {
   const project = new Project({ tsConfigFilePath: tsconfigPath })
 
   const results: FunctionDetail[] = []
@@ -54,7 +54,7 @@ function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDecla
 
   const paramString = func.getParameters().map((p) => p.getType().getText()).join(',')
 
-  if (isReturnTypeMatch(searchQuery, returnTypeText) && isArgumentMatch(searchQuery, func)) {
+  if (isReturnTypeMatch(searchQuery, func) && isArgumentMatch(searchQuery, func)) {
     return {
       fileName: sourceFile.getFilePath(),
       functionName: func.getName() ?? 'Anonymous',
@@ -67,10 +67,22 @@ function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDecla
   return undefined
 }
 
-function isReturnTypeMatch (searchQuery: SearchQuery, returnType: string): boolean {
+function isReturnTypeMatch (searchQuery: SearchQuery, func: MethodDeclaration | FunctionDeclaration): boolean {
+  const returnType = func.getReturnType()
+  const returnTypeText = returnType.getText()
+
   for (const searchReturnType of searchQuery.returnTypes) {
-    if (removeDynamicImports(returnType).includes(searchReturnType) || searchReturnType === '*') {
+    if (removeDynamicImports(returnTypeText).includes(searchReturnType) || searchReturnType === '*') {
       return true
+    }
+
+    // Symbol type match
+    const searchParameterTypeFirstChar = searchReturnType[0]
+    const searchParameterTypeLastChar = searchReturnType[searchReturnType.length - 1]
+    if (searchParameterTypeFirstChar === '{' && searchParameterTypeLastChar === '}') {
+      if (doReturnTypesMatch(searchReturnType, func)) {
+        return true
+      }
     }
   }
 
@@ -152,6 +164,25 @@ function removeDynamicImports (inputStr: string): string {
 function doTypesMatch (searchParameterType: string, functionParameter: ParameterDeclaration): boolean {
   const mandatoryObjectKeys = parseTypeQuery(searchParameterType)
   const properties = functionParameter.getType().getProperties()
+
+  const matches: boolean[] = []
+  for (const propName of mandatoryObjectKeys) {
+    let match = false
+    for (const tsProperty of properties) {
+      if (tsProperty.getName() === propName) {
+        match = true
+      }
+    }
+    matches.push(match)
+  }
+
+  return matches.every((match) => match)
+}
+
+// TODO functions are very similar, maybe we can merge them
+function doReturnTypesMatch (searchParameterType: string, func: MethodDeclaration | FunctionDeclaration): boolean {
+  const mandatoryObjectKeys = parseTypeQuery(searchParameterType)
+  const properties = func.getReturnType().getProperties()
 
   const matches: boolean[] = []
   for (const propName of mandatoryObjectKeys) {
