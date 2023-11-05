@@ -43,7 +43,7 @@ describe('getMatchingFunctions everything defined', () => {
 
   it('should correctly parse ":?...,string"', () => {
     const result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['...'], ['string']] })
-    expect(result.length).toEqual(3)
+    expect(result.length).toEqual(4)
   })
 
   it('should correctly parse ":?{a&b}"', () => {
@@ -58,6 +58,11 @@ describe('getMatchingFunctions everything defined', () => {
 
   it('should correctly parse ":?{a}"', () => {
     const result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: [''], parameterTypes: [['{a}']] })
+    expect(result.length).toEqual(1)
+  })
+
+  it('should correctly parse ":{a}?"', () => {
+    const result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['{a}'], parameterTypes: [] })
     expect(result.length).toEqual(1)
   })
 })

@@ -160,6 +160,7 @@ function removeDynamicImports (inputStr: string): string {
   return inputStr.replace(importRegex, '')
 }
 
+// TODO move to their own file ?
 // showcase how we might add partial type checking
 function doTypesMatch (searchParameterType: string, functionParameter: ParameterDeclaration): boolean {
   const mandatoryObjectKeys = parseTypeQuery(searchParameterType)

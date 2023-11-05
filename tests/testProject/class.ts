@@ -12,4 +12,8 @@ export class Foo {
   public asd (a: TestType): string {
     return '42'
   }
+
+  public tt1 (a: string, ...b: string[]): TestType {
+    return { a: '42', b: '42' }
+  }
 }
