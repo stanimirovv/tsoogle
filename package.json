@@ -1,6 +1,6 @@
 {
   "name": "@stanimirovv/tsoogle",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Find functions or methods by approximate signature - return type, argument types or both. Supports optional arguments, rest arguments and partial type checking.",
   "main": "dist/index.js",
   "bin": "dist/index.js",
