@@ -1,4 +1,4 @@
-import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration, Type } from 'ts-morph'
+import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration, SyntaxKind, type ArrowFunction } from 'ts-morph'
 import { parseTypeQuery } from './lexer'
 import type { SearchQuery } from './searchQuery.type'
 
@@ -29,7 +29,7 @@ export function evaluateSearchQuery (tsconfigPath: string, searchQuery: SearchQu
 }
 
 // TODO optimize the internal implementation. it is ugly
-function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', sourceFile: SourceFile): Array<MethodDeclaration | FunctionDeclaration> {
+function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', sourceFile: SourceFile): Array<MethodDeclaration | FunctionDeclaration | ArrowFunction> {
   if (kind === 'both') {
     const methods = sourceFile
       .getClasses()
@@ -37,7 +37,17 @@ function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', sourceFil
         c.getMethods()).flat()
 
     const functions = sourceFile.getFunctions()
-    return [...methods, ...functions]
+
+    const arrowFunctions = sourceFile.getVariableDeclarations().filter(variable => {
+      // Check if the initializer is an arrow function.
+      const initializer = variable.getInitializer()
+      return initializer != null && initializer.getKindName() === 'ArrowFunction'
+    }).map(variable => {
+      const arrowFunction = variable.getInitializerIfKind(SyntaxKind.ArrowFunction) as ArrowFunction
+      return arrowFunction
+    })
+
+    return [...methods, ...functions, ...arrowFunctions]
   } else if (kind === 'function') {
     return sourceFile.getFunctions()
   } else {
@@ -48,16 +58,20 @@ function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', sourceFil
   }
 }
 
-function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDeclaration, searchQuery: SearchQuery): FunctionDetail | undefined {
+function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDeclaration | ArrowFunction, searchQuery: SearchQuery): FunctionDetail | undefined {
   const returnType = func.getReturnType()
   const returnTypeText = returnType.getText()
 
   const paramString = func.getParameters().map((p) => p.getType().getText()).join(',')
 
   if (isReturnTypeMatch(searchQuery, func) && isArgumentMatch(searchQuery, func)) {
+    let functionName = 'Anonymous'
+    if ('getName' in func) {
+      functionName = func.getName() ?? 'Anonymous'
+    }
     return {
       fileName: sourceFile.getFilePath(),
-      functionName: func.getName() ?? 'Anonymous',
+      functionName,
       line: func.getStartLineNumber(),
       paramString: removeDynamicImports(paramString),
       returnType: removeDynamicImports(returnTypeText)
@@ -67,7 +81,7 @@ function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDecla
   return undefined
 }
 
-function isReturnTypeMatch (searchQuery: SearchQuery, func: MethodDeclaration | FunctionDeclaration): boolean {
+function isReturnTypeMatch (searchQuery: SearchQuery, func: MethodDeclaration | FunctionDeclaration | ArrowFunction): boolean {
   const returnType = func.getReturnType()
   const returnTypeText = returnType.getText()
 
@@ -89,7 +103,7 @@ function isReturnTypeMatch (searchQuery: SearchQuery, func: MethodDeclaration | 
   return false
 }
 
-function isArgumentMatch (searchQuery: SearchQuery, func: MethodDeclaration | FunctionDeclaration): boolean {
+function isArgumentMatch (searchQuery: SearchQuery, func: MethodDeclaration | FunctionDeclaration | ArrowFunction): boolean {
   // empty parameters means it matches everything
   if (searchQuery.parameterTypes.length === 0) {
     return true
@@ -181,7 +195,7 @@ function doTypesMatch (searchParameterType: string, functionParameter: Parameter
 }
 
 // TODO functions are very similar, maybe we can merge them
-function doReturnTypesMatch (searchParameterType: string, func: MethodDeclaration | FunctionDeclaration): boolean {
+function doReturnTypesMatch (searchParameterType: string, func: MethodDeclaration | FunctionDeclaration | ArrowFunction): boolean {
   const mandatoryObjectKeys = parseTypeQuery(searchParameterType)
   const properties = func.getReturnType().getProperties()
 

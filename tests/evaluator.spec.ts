@@ -65,4 +65,9 @@ describe('getMatchingFunctions everything defined', () => {
     const result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['{a}'], parameterTypes: [] })
     expect(result.length).toEqual(1)
   })
+
+  it('should correctly parse arrow functions', () => {
+    const result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['void'], parameterTypes: [] })
+    expect(result.length).toEqual(2)
+  })
 })

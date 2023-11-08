@@ -17,3 +17,6 @@ export class Foo {
     return { a: '42', b: '42' }
   }
 }
+
+export const foobarFn = (a: number, b: number, c: number): void => {}
+export function foobarFn2 (a: number, b: number, c: number): void {}
