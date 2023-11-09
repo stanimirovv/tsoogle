@@ -36,4 +36,49 @@ describe('parseTypeString', () => {
       parameterTypes: [['Product'], ['Service', 'number']]
     })
   })
+
+  it('should correctly parse "number"', () => {
+    const result = parse('number')
+    expect(result).toEqual({
+      kind: 'both',
+      returnTypes: ['number'],
+      parameterTypes: []
+    })
+  })
+
+  it('should correctly parse ":number"', () => {
+    const result = parse(':number')
+    expect(result).toEqual({
+      kind: 'both',
+      returnTypes: ['number'],
+      parameterTypes: []
+    })
+  })
+
+  it('should correctly parse "number?"', () => {
+    const result = parse(':number')
+    expect(result).toEqual({
+      kind: 'both',
+      returnTypes: ['number'],
+      parameterTypes: []
+    })
+  })
+
+  it('should correctly parse "number?number"', () => {
+    const result = parse('number?number')
+    expect(result).toEqual({
+      kind: 'both',
+      returnTypes: ['number'],
+      parameterTypes: [['number']]
+    })
+  })
+
+  it('should correctly parse "number,number"', () => {
+    const result = parse('number,number')
+    expect(result).toEqual({
+      kind: 'both',
+      returnTypes: ['*'],
+      parameterTypes: [['number'], ['number']]
+    })
+  })
 })

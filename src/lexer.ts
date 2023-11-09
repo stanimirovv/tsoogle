@@ -3,6 +3,8 @@ import type { SearchQuery } from './searchQuery.type'
 export function parse (input: string): SearchQuery {
   input = input.replace(/\s+/g, '')
 
+  input = simpleQueryToFullQuery(input)
+
   const fnType = input.split(':')[0]
   const kind = calculateKind(fnType)
 
@@ -28,6 +30,22 @@ export function parse (input: string): SearchQuery {
 // takes as input a string like {a,b,c} converts to ['a', 'b', 'c']
 export function parseTypeQuery (input: string): string[] {
   return input.replace('{', '').replace('}', '').split('&')
+}
+
+function simpleQueryToFullQuery (input: string): string {
+  if (!input.includes(':') && !input.includes(',')) {
+    input = `:${input}`
+  }
+
+  if (!input.includes('?') && !input.includes(',')) {
+    input = `${input}?`
+  }
+
+  if (input.includes(',') && !input.includes(':') && !input.includes('?')) {
+    return `:*?${input}`
+  }
+
+  return input
 }
 
 function calculateKind (match: string): 'function' | 'method' | 'both' {
