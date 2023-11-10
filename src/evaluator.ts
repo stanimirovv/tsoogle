@@ -62,7 +62,7 @@ function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDecla
   const returnType = func.getReturnType()
   const returnTypeText = returnType.getText()
 
-  const paramString = func.getParameters().map((p) => p.getType().getText()).join(',')
+  const paramString = func.getParameters().map((p) => `${p.getName()}: ${p.getType().getText()}`).join(',')
 
   if (isReturnTypeMatch(searchQuery, func) && isArgumentMatch(searchQuery, func)) {
     let functionName = 'Anonymous'
@@ -145,6 +145,8 @@ function isArgumentMatch (searchQuery: SearchQuery, func: MethodDeclaration | Fu
 function isSingleArgumentMatch (searchParameterTypes: string[], functionParameter: ParameterDeclaration): boolean {
   // Begin assuming it is false for each parameter
   const functionParameterType = functionParameter.getType().getText()
+  const functionName = functionParameter.getName()
+  const functionAndParameterName = `${functionName}: ${functionParameterType}`
 
   if (searchParameterTypes.length === 1 && searchParameterTypes[0] === '*') {
     return true
@@ -152,7 +154,7 @@ function isSingleArgumentMatch (searchParameterTypes: string[], functionParamete
 
   for (const searchParameterType of searchParameterTypes) {
     // Symbol name match
-    if (removeDynamicImports(functionParameterType).includes(searchParameterType)) {
+    if (removeDynamicImports(functionAndParameterName).includes(searchParameterType)) {
       return true
     }
 
