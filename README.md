@@ -9,9 +9,11 @@ Use tsoogle to:
 
 ```bash
 # find all that return a string
-npx ts-node index.ts testproject.tsconfig.json ":string?"      
-/Users/dot/code/tsoogle/tests/testProject/class.ts:4 bar(string,string): string
-/Users/dot/code/tsoogle/tests/testProject/functions.ts:5 asd2(string,number): string
+npx ts-node index.ts testproject.tsconfig.json "string"       
+/Users/dot/code/tsoogle/tests/testProject/class.ts:4 bar(a: string,b: string): string
+/Users/dot/code/tsoogle/tests/testProject/class.ts:12 asd(a: TestType): string
+/Users/dot/code/tsoogle/tests/testProject/functions.ts:1 asd(a: string,b: string): string
+/Users/dot/code/tsoogle/tests/testProject/functions.ts:5 asd2(a: string,b: number): string
 /Users/dot/code/tsoogle/tests/testProject/functions.ts:9 asd3(): boolean | Record<string, string>
 
 # find all that return a string, have 2 arguments and their first argument is a string
@@ -21,14 +23,13 @@ npx ts-node index.ts testproject.tsconfig.json ":string?string,*"
 /Users/dot/code/tsoogle/tests/testProject/functions.ts:5 asd2(string,number): string
 
 # find all that accept as parametes a string and a number and return anything
-npx ts-node index.ts testproject.tsconfig.json ":*?string,number"
-/Users/zlatinstanimirov/code/tsoogle/tests/testProject/functions.ts:5 asd2(string,number): string
+npx ts-node index.ts testproject.tsconfig.json "string?string,*" 
+/Users/zlatinstanimirov/code/tsoogle/tests/testProject/class.ts:4 bar(a: string,b: string): string
 
 # find all that accept as parameters a string and a number OR string and return anything
-npx ts-node index.ts testproject.tsconfig.json ":*?string,number|string"
-/Users/dot/code/tsoogle/tests/testProject/class.ts:4 bar(string,string): string
-/Users/dot/code/tsoogle/tests/testProject/functions.ts:1 asd(string,string): string
-/Users/dot/code/tsoogle/tests/testProject/functions.ts:5 asd2(string,number): strin
+ npx ts-node index.ts testproject.tsconfig.json "*?string,number|string" 
+/Users/zlatinstanimirov/code/tsoogle/tests/testProject/class.ts:4 bar(a: string,b: string): string
+/Users/zlatinstanimirov/code/tsoogle/tests/testProject/class.ts:16 tt1(a: string,b: string[]): TestType
 
 # it supports partial type checking
 npx ts-node index.ts testproject.tsconfig.json ":*?{a&b}"
