@@ -1,8 +1,9 @@
 import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile } from 'ts-morph'
+import { type ProjectFunction } from './projectFunction.type'
 
-type FunctionFetcher = (sourceFile: SourceFile) => Array<MethodDeclaration | FunctionDeclaration | ArrowFunction>
+type FunctionFetcher = (sourceFile: SourceFile) => ProjectFunction[]
 
-export function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): Array<MethodDeclaration | FunctionDeclaration | ArrowFunction> {
+export function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): ProjectFunction[] {
   const project = new Project({ tsConfigFilePath: tsconfigPath })
   const functionFetcher = getSourceFileFunctionFetcher(kind)
 
@@ -24,7 +25,7 @@ function getSourceFileFunctionFetcher(kind: 'both' | 'function' | 'method'): Fun
   }
 }
 
-const fetchAll = (sourceFile: SourceFile): Array<MethodDeclaration | FunctionDeclaration | ArrowFunction> => {
+const fetchAll = (sourceFile: SourceFile): ProjectFunction[] => {
   const methods = sourceFile
     .getClasses()
     .map((c) =>

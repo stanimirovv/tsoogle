@@ -1,7 +1,7 @@
 import { type FunctionDeclaration, type MethodDeclaration, type ParameterDeclaration, type ArrowFunction } from 'ts-morph'
-import { getMethodsAndFunctions } from './exporer'
 import { parseTypeQuery } from './lexer'
 import { getMatcher } from './matcher'
+import { type ProjectFunction } from './projectFunction.type'
 import type { SearchQuery } from './searchQuery.type'
 
 export interface FunctionDetail {
@@ -14,11 +14,10 @@ export interface FunctionDetail {
 
 const doStringsMatch = getMatcher()
 
-export function evaluateSearchQuery (tsconfigPath: string, searchQuery: SearchQuery): FunctionDetail[] {
+export function evaluateSearchQuery (projectFunctions: ProjectFunction[], searchQuery: SearchQuery): FunctionDetail[] {
   const results: FunctionDetail[] = []
 
-  const methodsAndFunctions = getMethodsAndFunctions(searchQuery.kind, tsconfigPath)
-  for (const func of methodsAndFunctions) {
+  for (const func of projectFunctions) {
     const result = search(func, searchQuery)
     if (result !== undefined) {
       results.push(result)
