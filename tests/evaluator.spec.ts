@@ -70,4 +70,18 @@ describe('getMatchingFunctions everything defined', () => {
     const result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['void'], parameterTypes: [] })
     expect(result.length).toEqual(2)
   })
+
+  it('should correctly match with Levenshtein distances', () => {
+    let result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['vod'], parameterTypes: [] })
+    expect(result.length).toEqual(2)
+
+    result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['vood'], parameterTypes: [] })
+    expect(result.length).toEqual(2)
+
+    result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['mood'], parameterTypes: [] })
+    expect(result.length).toEqual(2)
+
+    result = evaluateSearchQuery('testproject.tsconfig.json', { kind: 'both', returnTypes: ['voi'], parameterTypes: [] })
+    expect(result.length).toEqual(2)
+  })
 })
