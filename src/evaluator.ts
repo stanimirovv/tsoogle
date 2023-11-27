@@ -1,4 +1,5 @@
-import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration, SyntaxKind, type ArrowFunction } from 'ts-morph'
+import { type FunctionDeclaration, type MethodDeclaration, type ParameterDeclaration, type ArrowFunction } from 'ts-morph'
+import { getMethodsAndFunctions } from './exporer'
 import { parseTypeQuery } from './lexer'
 import { getMatcher } from './matcher'
 import type { SearchQuery } from './searchQuery.type'
@@ -14,54 +15,20 @@ export interface FunctionDetail {
 const doStringsMatch = getMatcher()
 
 export function evaluateSearchQuery (tsconfigPath: string, searchQuery: SearchQuery): FunctionDetail[] {
-  const project = new Project({ tsConfigFilePath: tsconfigPath })
-
   const results: FunctionDetail[] = []
 
-  for (const sourceFile of project.getSourceFiles()) {
-    const methodsAndFunctions = getMethodsAndFunctions(searchQuery.kind, sourceFile)
-    for (const func of methodsAndFunctions) {
-      const result = search(sourceFile, func, searchQuery)
-      if (result !== undefined) {
-        results.push(result)
-      }
+  const methodsAndFunctions = getMethodsAndFunctions(searchQuery.kind, tsconfigPath)
+  for (const func of methodsAndFunctions) {
+    const result = search(func, searchQuery)
+    if (result !== undefined) {
+      results.push(result)
     }
   }
 
   return results
 }
 
-// TODO optimize the internal implementation. it is ugly
-function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', sourceFile: SourceFile): Array<MethodDeclaration | FunctionDeclaration | ArrowFunction> {
-  if (kind === 'both') {
-    const methods = sourceFile
-      .getClasses()
-      .map((c) =>
-        c.getMethods()).flat()
-
-    const functions = sourceFile.getFunctions()
-
-    const arrowFunctions = sourceFile.getVariableDeclarations().filter(variable => {
-      // Check if the initializer is an arrow function.
-      const initializer = variable.getInitializer()
-      return initializer != null && initializer.getKindName() === 'ArrowFunction'
-    }).map(variable => {
-      const arrowFunction = variable.getInitializerIfKind(SyntaxKind.ArrowFunction) as ArrowFunction
-      return arrowFunction
-    })
-
-    return [...methods, ...functions, ...arrowFunctions]
-  } else if (kind === 'function') {
-    return sourceFile.getFunctions()
-  } else {
-    return sourceFile
-      .getClasses()
-      .map((c) =>
-        c.getMethods()).flat()
-  }
-}
-
-function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDeclaration | ArrowFunction, searchQuery: SearchQuery): FunctionDetail | undefined {
+function search (func: MethodDeclaration | FunctionDeclaration | ArrowFunction, searchQuery: SearchQuery): FunctionDetail | undefined {
   const returnType = func.getReturnType()
   const returnTypeText = returnType.getText()
 
@@ -72,8 +39,9 @@ function search (sourceFile: SourceFile, func: MethodDeclaration | FunctionDecla
     if ('getName' in func) {
       functionName = func.getName() ?? 'Anonymous'
     }
+
     return {
-      fileName: sourceFile.getFilePath(),
+      fileName: func.getSourceFile().getFilePath(),
       functionName,
       line: func.getStartLineNumber(),
       paramString: removeDynamicImports(paramString),
