@@ -1,5 +1,6 @@
 import { type FunctionDeclaration, Project, type SourceFile, type MethodDeclaration, type ParameterDeclaration, SyntaxKind, type ArrowFunction } from 'ts-morph'
 import { parseTypeQuery } from './lexer'
+import { getMatcher } from './matcher'
 import type { SearchQuery } from './searchQuery.type'
 
 export interface FunctionDetail {
@@ -9,6 +10,8 @@ export interface FunctionDetail {
   line: number
   returnType: string
 }
+
+const doStringsMatch = getMatcher()
 
 export function evaluateSearchQuery (tsconfigPath: string, searchQuery: SearchQuery): FunctionDetail[] {
   const project = new Project({ tsConfigFilePath: tsconfigPath })
@@ -86,7 +89,8 @@ function isReturnTypeMatch (searchQuery: SearchQuery, func: MethodDeclaration | 
   const returnTypeText = returnType.getText()
 
   for (const searchReturnType of searchQuery.returnTypes) {
-    if (removeDynamicImports(returnTypeText).includes(searchReturnType) || searchReturnType === '*') {
+    const stringsMatch = doStringsMatch(removeDynamicImports(returnTypeText), searchReturnType)
+    if (stringsMatch || searchReturnType === '*') {
       return true
     }
 
@@ -154,7 +158,7 @@ function isSingleArgumentMatch (searchParameterTypes: string[], functionParamete
 
   for (const searchParameterType of searchParameterTypes) {
     // Symbol name match
-    if (removeDynamicImports(functionAndParameterName).includes(searchParameterType)) {
+    if (doStringsMatch(removeDynamicImports(functionAndParameterName), searchParameterType)) {
       return true
     }
 
