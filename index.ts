@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { evaluateSearchQuery, type FunctionDetail } from './src/evaluator'
+import { getMethodsAndFunctions } from './src/exporer'
 import { parse } from './src/lexer'
 import { prettify } from './src/prettyfier'
 
@@ -9,13 +10,15 @@ const userSearchQuery = process.argv[3]
 
 export function tsoogle (tsConfigFilePath: string, userSearchQuery: string): FunctionDetail[] {
   const searchQuery = parse(userSearchQuery)
-  return evaluateSearchQuery(tsConfigFilePath, searchQuery)
+  const projectFunctions = getMethodsAndFunctions(searchQuery.kind, tsConfigFilePath)
+  return evaluateSearchQuery(projectFunctions, searchQuery)
 }
 
 export function tsoogleCmd (tsConfigFilePath: string, userSearchQuery: string): string {
   const searchQuery = parse(userSearchQuery)
   let output = ''
-  evaluateSearchQuery(tsConfigFilePath, searchQuery).forEach(func => {
+  const projectFunctions = getMethodsAndFunctions(searchQuery.kind, tsConfigFilePath)
+  evaluateSearchQuery(projectFunctions, searchQuery).forEach(func => {
     output += `${prettify(func)}\n`
   })
   return output
