@@ -1,9 +1,18 @@
 import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile } from 'ts-morph'
-import { type ProjectFunction } from './projectFunction.type'
+import { type ProjectFunction } from '../projectFunction.type'
 
 type FunctionFetcher = (sourceFile: SourceFile) => ProjectFunction[]
 
-export function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): ProjectFunction[] {
+export function getMethodsAndFunctions(kind: 'both' | 'function' | 'method', tsconfigPath: string, useIndex: boolean): ProjectFunction[] {
+  if (!useIndex) {
+    return _getMethodsAndFunctions(kind, tsconfigPath)
+  }
+  return _getMethodsAndFunctions(kind, tsconfigPath)
+  // if index exists return index
+  // else fetch functions, create index, return functions
+}
+
+function _getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): ProjectFunction[] {
   const project = new Project({ tsConfigFilePath: tsconfigPath })
   const functionFetcher = getSourceFileFunctionFetcher(kind)
 

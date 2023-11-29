@@ -1,10 +1,10 @@
 import { evaluateSearchQuery } from '../src/evaluator'
-import { getMethodsAndFunctions } from '../src/exporer'
+import { getMethodsAndFunctions } from '../src/explorer/exporer'
 const tsConfigFilePath = 'testproject.tsconfig.json'
 
-const projectFunctions = getMethodsAndFunctions('function', tsConfigFilePath)
-const projectFunctionsAndMethods = getMethodsAndFunctions('both', tsConfigFilePath)
-const projectMethods = getMethodsAndFunctions('method', tsConfigFilePath)
+const projectFunctions = getMethodsAndFunctions('function', tsConfigFilePath, false)
+const projectFunctionsAndMethods = getMethodsAndFunctions('both', tsConfigFilePath, false)
+const projectMethods = getMethodsAndFunctions('method', tsConfigFilePath, false)
 
 describe('getMatchingFunctions everything defined', () => {
   it('should correctly parse "function:string?string,string"', () => {
