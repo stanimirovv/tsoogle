@@ -1,15 +1,29 @@
-import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile } from 'ts-morph'
+import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile, ts } from 'ts-morph'
 import { type ProjectFunction } from '../projectFunction.type'
 
 type FunctionFetcher = (sourceFile: SourceFile) => ProjectFunction[]
 
-export function getMethodsAndFunctions(kind: 'both' | 'function' | 'method', tsconfigPath: string, useIndex: boolean): ProjectFunction[] {
+export async function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string, useIndex: boolean): Promise<ProjectFunction[]> {
   if (!useIndex) {
     return _getMethodsAndFunctions(kind, tsconfigPath)
   }
+
+  // if (!doesDatabaseExist(tsconfigPath)) {
+  //   await initializeDatabase(tsconfigPath)
+  // }
+
+  // const functions = await getFunctions(kind, tsconfigPath)
+
+  // if (functions.length === 0) {
+  //   const functions = _getMethodsAndFunctions(kind, tsconfigPath)
+  //   const currentGitCommitId = '12345'
+  //   for (const func of functions) {
+  //     await storeFunctionInDatabase(tsconfigPath, currentGitCommitId, func)
+  //   }
+  //   // store functions to DB
+  //   return functions
+  // }
   return _getMethodsAndFunctions(kind, tsconfigPath)
-  // if index exists return index
-  // else fetch functions, create index, return functions
 }
 
 function _getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): ProjectFunction[] {
@@ -24,7 +38,7 @@ function _getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfig
   return projectFunctions
 }
 
-function getSourceFileFunctionFetcher(kind: 'both' | 'function' | 'method'): FunctionFetcher {
+function getSourceFileFunctionFetcher (kind: 'both' | 'function' | 'method'): FunctionFetcher {
   if (kind === 'both') {
     return fetchAll
   } else if (kind === 'function') {
@@ -63,4 +77,9 @@ const fetchMethods = (sourceFile: SourceFile): MethodDeclaration[] => {
     .getClasses()
     .map((c) =>
       c.getMethods()).flat()
+}
+
+function removeDynamicImports (inputStr: string): string {
+  const importRegex = /import\([^)]+\)\./g
+  return inputStr.replace(importRegex, '')
 }

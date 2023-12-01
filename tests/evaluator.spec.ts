@@ -1,12 +1,19 @@
 import { evaluateSearchQuery } from '../src/evaluator'
 import { getMethodsAndFunctions } from '../src/explorer/exporer'
+import { type ProjectFunction } from '../src/projectFunction.type'
 const tsConfigFilePath = 'testproject.tsconfig.json'
 
-const projectFunctions = getMethodsAndFunctions('function', tsConfigFilePath, false)
-const projectFunctionsAndMethods = getMethodsAndFunctions('both', tsConfigFilePath, false)
-const projectMethods = getMethodsAndFunctions('method', tsConfigFilePath, false)
+let projectFunctions: ProjectFunction[]
+let projectFunctionsAndMethods: ProjectFunction[]
+let projectMethods: ProjectFunction[]
 
 describe('getMatchingFunctions everything defined', () => {
+  beforeAll(async () => {
+    projectFunctions = await getMethodsAndFunctions('function', tsConfigFilePath, false)
+    projectFunctionsAndMethods = await getMethodsAndFunctions('both', tsConfigFilePath, false)
+    projectMethods = await getMethodsAndFunctions('method', tsConfigFilePath, false)
+  })
+
   it('should correctly parse "function:string?string,string"', () => {
     const result = evaluateSearchQuery(projectFunctions, { kind: 'function', returnTypes: ['string'], parameterTypes: [['string'], ['string']] })
     expect(result.length).toEqual(1)
