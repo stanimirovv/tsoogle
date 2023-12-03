@@ -1,7 +1,8 @@
 import sqlite3 from 'sqlite3'
 import path from 'path'
 import fs from 'fs'
-import { type FunctionDetail } from '../evaluator'
+import { type ProjectFunction } from '../projectFunction.interface'
+import serialize from 'serialize-javascript'
 
 const TABLE_DEFFINITION = 'CREATE TABLE functions (id INTEGER PRIMARY KEY, commitId TEXT, payload TEXT);CREATE INDEX idx_functions_commitId ON functions(commitId);'
 
@@ -53,9 +54,9 @@ export function doesDatabaseExist (tsconfigFilePath: string): boolean {
   return fs.existsSync(dbPath)
 }
 
-export async function storeFunctionInDatabase (tsconfigFilePath: string, commitId: string, func: FunctionDetail): Promise<void> {
+export async function storeFunctionInDatabase (tsconfigFilePath: string, commitId: string, func: ProjectFunction): Promise<void> {
   const db = getDbConnection(tsconfigFilePath)
-  db.run('INSERT INTO functions (commitId, payload) VALUES (?, ?)', [commitId, JSON.stringify(func)])
+  db.run('INSERT INTO functions (commitId, payload) VALUES (?, ?)', [commitId, serialize(func)])
   await new Promise((resolve, reject) => {
     db.close((err: unknown) => {
       if (err !== null) {
@@ -66,9 +67,9 @@ export async function storeFunctionInDatabase (tsconfigFilePath: string, commitI
   })
 }
 
-export async function getFunctions (tsconfigFilePath: string, commitId: string): Promise<FunctionDetail[]> {
+export async function getFunctionsFromDb (tsconfigFilePath: string, commitId: string): Promise<ProjectFunction[]> {
   const db = getDbConnection(tsconfigFilePath)
-  const rows: FunctionDetail[] = await new Promise((resolve, reject) => {
+  const rows: ProjectFunction[] = await new Promise((resolve, reject) => {
     db.all('SELECT * FROM functions WHERE commitId=?', [commitId], (err: unknown, rows: any) => {
       if (err !== null) {
         reject(err)
@@ -87,5 +88,6 @@ export async function getFunctions (tsconfigFilePath: string, commitId: string):
     })
   })
 
-  return rows.map((row: any) => JSON.parse(row.payload))
+  // eslint-disable-next-line no-eval
+  return rows.map((row: any) => eval('(' + row.payload + ')'))
 }

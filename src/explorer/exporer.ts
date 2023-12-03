@@ -1,38 +1,59 @@
-import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile, ts } from 'ts-morph'
-import { type ProjectFunction } from '../projectFunction.type'
+import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile} from 'ts-morph'
+import { type ProjectFunction } from '../projectFunction.interface'
+// import { doesDatabaseExist, getFunctionsFromDb, initializeDatabase, storeFunctionInDatabase } from './indexer'
 
-type FunctionFetcher = (sourceFile: SourceFile) => ProjectFunction[]
+type tsMorphFunction = MethodDeclaration | FunctionDeclaration | ArrowFunction
+type FunctionFetcher = (sourceFile: SourceFile) => tsMorphFunction[]
 
 export async function getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string, useIndex: boolean): Promise<ProjectFunction[]> {
   if (!useIndex) {
     return _getMethodsAndFunctions(kind, tsconfigPath)
   }
+  return _getMethodsAndFunctions(kind, tsconfigPath)
 
   // if (!doesDatabaseExist(tsconfigPath)) {
   //   await initializeDatabase(tsconfigPath)
   // }
 
-  // const functions = await getFunctions(kind, tsconfigPath)
+  // const currentGitCommitId = '12345'
+  // let functions = await getFunctionsFromDb(tsconfigPath, currentGitCommitId)
 
   // if (functions.length === 0) {
-  //   const functions = _getMethodsAndFunctions(kind, tsconfigPath)
-  //   const currentGitCommitId = '12345'
+  //   functions = _getMethodsAndFunctions(kind, tsconfigPath)
   //   for (const func of functions) {
   //     await storeFunctionInDatabase(tsconfigPath, currentGitCommitId, func)
   //   }
-  //   // store functions to DB
-  //   return functions
   // }
-  return _getMethodsAndFunctions(kind, tsconfigPath)
+  // return functions
 }
 
 function _getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): ProjectFunction[] {
   const project = new Project({ tsConfigFilePath: tsconfigPath })
   const functionFetcher = getSourceFileFunctionFetcher(kind)
 
-  const projectFunctions: Array<MethodDeclaration | FunctionDeclaration | ArrowFunction> = []
+  const projectFunctions: ProjectFunction[] = []
   for (const sourceFile of project.getSourceFiles()) {
-    projectFunctions.push(...functionFetcher(sourceFile))
+    const tsMorphFunctions = functionFetcher(sourceFile)
+    const projectFunctionsForFile: ProjectFunction[] = tsMorphFunctions.map((func) => {
+      let funcName = 'Anonymous'
+      if ('getName' in func) {
+        funcName = func.getName() ?? 'Anonymous'
+      }
+      return {
+        name: funcName,
+        parameters: func.getParameters().map((prop) => {
+          return {
+            name: prop.getName(),
+            type: prop.getType().getText()
+          }
+        }),
+        paramString: func.getParameters().map((p) => `${p.getName()}: ${p.getType().getText()}`).join(','),
+        returnType: func.getReturnType().getText(),
+        fileName: sourceFile.getFilePath(),
+        fileLine: func.getStartLineNumber()
+      }
+    })
+    projectFunctions.push(...projectFunctionsForFile)
   }
 
   return projectFunctions
@@ -48,7 +69,7 @@ function getSourceFileFunctionFetcher (kind: 'both' | 'function' | 'method'): Fu
   }
 }
 
-const fetchAll = (sourceFile: SourceFile): ProjectFunction[] => {
+const fetchAll = (sourceFile: SourceFile): tsMorphFunction[]  => {
   const methods = sourceFile
     .getClasses()
     .map((c) =>
@@ -77,9 +98,4 @@ const fetchMethods = (sourceFile: SourceFile): MethodDeclaration[] => {
     .getClasses()
     .map((c) =>
       c.getMethods()).flat()
-}
-
-function removeDynamicImports (inputStr: string): string {
-  const importRegex = /import\([^)]+\)\./g
-  return inputStr.replace(importRegex, '')
 }
