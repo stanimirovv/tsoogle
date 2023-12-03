@@ -1,7 +1,7 @@
-import { exec as execCallback } from 'child_process';
-import { promisify } from 'util';
+import { exec as execCallback } from 'child_process'
+import { promisify } from 'util'
 
-const exec = promisify(execCallback);
+const exec = promisify(execCallback)
 
 export async function getCommitHash (): Promise<string> {
   try {
