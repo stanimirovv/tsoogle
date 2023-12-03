@@ -2,7 +2,6 @@ import sqlite3 from 'sqlite3'
 import path from 'path'
 import fs from 'fs'
 import { type ProjectFunction } from '../projectFunction.interface'
-import serialize from 'serialize-javascript'
 
 const TABLE_DEFFINITION = 'CREATE TABLE functions (id INTEGER PRIMARY KEY, commitId TEXT, payload TEXT);CREATE INDEX idx_functions_commitId ON functions(commitId);'
 
@@ -56,7 +55,7 @@ export function doesDatabaseExist (tsconfigFilePath: string): boolean {
 
 export async function storeFunctionInDatabase (tsconfigFilePath: string, commitId: string, func: ProjectFunction): Promise<void> {
   const db = getDbConnection(tsconfigFilePath)
-  db.run('INSERT INTO functions (commitId, payload) VALUES (?, ?)', [commitId, serialize(func)])
+  db.run('INSERT INTO functions (commitId, payload) VALUES (?, ?)', [commitId, JSON.stringify(func)])
   await new Promise((resolve, reject) => {
     db.close((err: unknown) => {
       if (err !== null) {
@@ -69,13 +68,14 @@ export async function storeFunctionInDatabase (tsconfigFilePath: string, commitI
 
 export async function getFunctionsFromDb (tsconfigFilePath: string, commitId: string): Promise<ProjectFunction[]> {
   const db = getDbConnection(tsconfigFilePath)
-  const rows: ProjectFunction[] = await new Promise((resolve, reject) => {
+  const rows: any[] = await new Promise((resolve, reject) => {
     db.all('SELECT * FROM functions WHERE commitId=?', [commitId], (err: unknown, rows: any) => {
       if (err !== null) {
         reject(err)
         return
       }
-      resolve(rows)
+      const funcs = rows.map((row: any) => JSON.parse(row.payload) )
+      resolve(funcs)
     })
   })
 
@@ -88,6 +88,5 @@ export async function getFunctionsFromDb (tsconfigFilePath: string, commitId: st
     })
   })
 
-  // eslint-disable-next-line no-eval
-  return rows.map((row: any) => eval('(' + row.payload + ')'))
+  return rows
 }

@@ -1,6 +1,6 @@
 import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, Project, SyntaxKind, type SourceFile} from 'ts-morph'
 import { type ProjectFunction } from '../projectFunction.interface'
-// import { doesDatabaseExist, getFunctionsFromDb, initializeDatabase, storeFunctionInDatabase } from './indexer'
+import { doesDatabaseExist, initializeDatabase, getFunctionsFromDb, storeFunctionInDatabase } from './indexer'
 
 type tsMorphFunction = MethodDeclaration | FunctionDeclaration | ArrowFunction
 type FunctionFetcher = (sourceFile: SourceFile) => tsMorphFunction[]
@@ -9,22 +9,21 @@ export async function getMethodsAndFunctions (kind: 'both' | 'function' | 'metho
   if (!useIndex) {
     return _getMethodsAndFunctions(kind, tsconfigPath)
   }
-  return _getMethodsAndFunctions(kind, tsconfigPath)
 
-  // if (!doesDatabaseExist(tsconfigPath)) {
-  //   await initializeDatabase(tsconfigPath)
-  // }
+  if (!doesDatabaseExist(tsconfigPath)) {
+    await initializeDatabase(tsconfigPath)
+  }
 
-  // const currentGitCommitId = '12345'
-  // let functions = await getFunctionsFromDb(tsconfigPath, currentGitCommitId)
+  const currentGitCommitId = '12345'
+  let functions = await getFunctionsFromDb(tsconfigPath, currentGitCommitId)
 
-  // if (functions.length === 0) {
-  //   functions = _getMethodsAndFunctions(kind, tsconfigPath)
-  //   for (const func of functions) {
-  //     await storeFunctionInDatabase(tsconfigPath, currentGitCommitId, func)
-  //   }
-  // }
-  // return functions
+  if (functions.length === 0) {
+    functions = _getMethodsAndFunctions(kind, tsconfigPath)
+    for (const func of functions) {
+      await storeFunctionInDatabase(tsconfigPath, currentGitCommitId, func)
+    }
+  }
+  return functions
 }
 
 function _getMethodsAndFunctions (kind: 'both' | 'function' | 'method', tsconfigPath: string): ProjectFunction[] {

@@ -97,4 +97,14 @@ describe('getMatchingFunctions everything defined', () => {
     result = evaluateSearchQuery(projectFunctionsAndMethods, { kind: 'both', returnTypes: ['voi'], parameterTypes: [] })
     expect(result.length).toEqual(2)
   })
+
+  it('indexer should return the same results as the explorer', async () => {
+    const functionsWithoutIndex = await getMethodsAndFunctions('both', tsConfigFilePath, false)
+    // ensure functions are indexed if they aren't already
+    await getMethodsAndFunctions('both', tsConfigFilePath, true)
+    // get functions from index
+    const functionsFromIndexer = await getMethodsAndFunctions('both', tsConfigFilePath, true)
+    expect(functionsFromIndexer.length).toEqual(functionsWithoutIndex.length)
+    expect(JSON.stringify(functionsFromIndexer)).toEqual(JSON.stringify(functionsWithoutIndex))
+  })
 })

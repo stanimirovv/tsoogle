@@ -2,7 +2,7 @@ import { doesDatabaseExist, getDbPath, getFunctionsFromDb, initializeDatabase, s
 import fs from 'fs'
 
 describe('test indexer', () => {
-  it.skip('should correctly create DB, verify DB and insert & select records', async () => {
+  it('should correctly create DB, verify DB and insert & select records', async () => {
     cleanupDB()
 
     const tsConfigFilePath = 'testproject.tsconfig.json'
