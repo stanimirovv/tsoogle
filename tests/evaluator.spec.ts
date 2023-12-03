@@ -1,5 +1,5 @@
 import { evaluateSearchQuery } from '../src/evaluator'
-import { getMethodsAndFunctions } from '../src/explorer/exporer'
+import { getMethodsAndFunctions } from '../src/explorer/explorer'
 import { type ProjectFunction } from '../src/projectFunction.interface'
 const tsConfigFilePath = 'testproject.tsconfig.json'
 

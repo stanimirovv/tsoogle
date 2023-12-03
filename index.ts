@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { evaluateSearchQuery, type FunctionDetail } from './src/evaluator'
-import { getMethodsAndFunctions } from './src/explorer/exporer'
+import { getMethodsAndFunctions } from './src/explorer/explorer'
 import { parse } from './src/lexer'
 import { prettify } from './src/prettyfier'
 
