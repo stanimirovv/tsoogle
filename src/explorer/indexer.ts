@@ -44,12 +44,12 @@ function getDbConnection (tsconfigFilePath: string): sqlite3.Database {
 
 export function getDbPath (tsconfigFilePath: string): string {
   const tsConfigDir = path.dirname(tsconfigFilePath)
-  return `${tsConfigDir}/tsoogle.db`
+  return `${tsConfigDir}/.tsoogle.db`
 }
 
 export function doesDatabaseExist (tsconfigFilePath: string): boolean {
   const tsConfigDir = path.dirname(tsconfigFilePath)
-  const dbPath = `${tsConfigDir}/tsoogle.db`
+  const dbPath = `${tsConfigDir}/.tsoogle.db`
   return fs.existsSync(dbPath)
 }
 

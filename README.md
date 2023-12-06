@@ -31,10 +31,6 @@ npx ts-node index.ts testproject.tsconfig.json "string?string,*"
 /Users/zlatinstanimirov/code/tsoogle/tests/testProject/class.ts:4 bar(a: string,b: string): string
 /Users/zlatinstanimirov/code/tsoogle/tests/testProject/class.ts:16 tt1(a: string,b: string[]): TestType
 
-# it supports partial type checking
-npx ts-node index.ts testproject.tsconfig.json ":*?{a&b}"
-{ kind: 'both', returnTypes: [ '*' ], parameterTypes: [ [ '{a&b}' ] ] }
-/Users/dot/code/tsoogle/tests/testProject/class.ts:12 asd(TestType): string
 ```
 ## Usage
 ```bash
