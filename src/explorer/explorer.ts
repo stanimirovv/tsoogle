@@ -2,6 +2,7 @@ import { type MethodDeclaration, type FunctionDeclaration, type ArrowFunction, P
 import { type ProjectFunction } from '../projectFunction.interface'
 import { getCommitHash } from './getCommitHash'
 import { doesDatabaseExist, initializeDatabase, getFunctionsFromDb, storeFunctionInDatabase } from './indexer'
+import path from 'path'
 
 type tsMorphFunction = MethodDeclaration | FunctionDeclaration | ArrowFunction
 type FunctionFetcher = (sourceFile: SourceFile) => tsMorphFunction[]
@@ -15,7 +16,8 @@ export async function getMethodsAndFunctions (kind: 'both' | 'function' | 'metho
     await initializeDatabase(tsconfigPath)
   }
 
-  const currentGitCommitId = await getCommitHash()
+  const tsConfigDir = path.dirname(tsconfigPath)
+  const currentGitCommitId = await getCommitHash(tsConfigDir)
   let functions = await getFunctionsFromDb(tsconfigPath, currentGitCommitId)
 
   if (functions.length === 0) {

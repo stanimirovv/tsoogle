@@ -3,9 +3,10 @@ import { promisify } from 'util'
 
 const exec = promisify(execCallback)
 
-export async function getCommitHash (): Promise<string> {
+export async function getCommitHash (cwd: string): Promise<string> {
   try {
-    const { stdout } = await exec('git rev-parse HEAD')
+    // NOTE: bellow is unsafe
+    const { stdout } = await exec(`cd ${cwd} && git rev-parse HEAD`)
     return stdout.trim()
   } catch (e) {
     return 'unknown'
